@@ -9,6 +9,8 @@
 #include <errno.h>
 #include <netinet/in.h>
 #include <stdbool.h>
+#include <arpa/inet.h>
+#include <unistd.h>
 
 #include "util.h"
 

@@ -6,6 +6,7 @@
 #define BUFFER_SIZE 512
 #define MAX_CONNECTIONS 512
 #define PORT 4399
+#define BIRDS_RESPONSE_HEADER "Birds_X: RESPONSE HEADER\n"
 
 typedef struct {
   struct sockaddr_in *address;

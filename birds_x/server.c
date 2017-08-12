@@ -35,11 +35,15 @@ int listen_socket(birds_socket_t* const* const birds) {
 int init_socket_loop(birds_socket_t** const birds) {
   while (1) {
     int accept_fd = create_accept(birds);
-    int len = 0;
-    bzero(&buffer, sizeof(BUFFER_SIZE));
-    printf("%s\n", buffer);
-    recv_all(&accept_fd, &buffer, sizeof(BUFFER_SIZE));
-    send_all(&accept_fd, &buffer, strlen(buffer));
+    recv_all(&accept_fd, &buffer, sizeof(buffer));
+    const char *route = strtok(buffer, "\n");
+    printf("[LOG]: %s\n", route);
+    char response[strlen(BIRDS_RESPONSE_HEADER) + strlen(buffer) + 1];
+    strcpy(response, BIRDS_RESPONSE_HEADER);
+    strcat(response, buffer);
+    printf("response %s\n", response);
+    send_all(&accept_fd, response, sizeof(response));
+    bzero(&buffer, BUFFER_SIZE);
     close(accept_fd);
   }
   printf("Done\n");
@@ -48,7 +52,7 @@ int init_socket_loop(birds_socket_t** const birds) {
 
 int create_accept(birds_socket_t* const* const birds) {
   int fd;
-  ssize_t len = sizeof((*(*birds)->address));
+  unsigned int len = sizeof((*(*birds)->address));
   if ((fd = accept((*birds)->sock_fd, (struct sockaddr*)(*birds)->address, &len)) < 0) {
     fail("create accept socket failured");
   }
@@ -59,6 +63,7 @@ void allocate(birds_socket_t** const birds) {
   *birds = malloc(sizeof(birds_socket_t));
   (*birds)->address = malloc(sizeof(struct sockaddr_in));
   (*birds)->sock_fd = -1;
+  bzero(&buffer, BUFFER_SIZE);
 }
 
 void release(birds_socket_t** birds) {

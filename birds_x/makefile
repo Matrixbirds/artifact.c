@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -g -Wall -std=c99
+CFLAGS = -g -Wall -Werror -std=c99
 objects = main.o server.o util.o
 app: $(objects)
 	$(CC) -o app $(CFLAGS) $(objects)
