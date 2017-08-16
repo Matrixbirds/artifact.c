@@ -3,7 +3,7 @@
 
 #include "server.h"
 
-int main(int argc, char *argv[]) {
+int main(int argc, char ** restrict argv) {
   birds_socket_t *birds = NULL;
   allocate(&birds);
   create_socket(&birds);

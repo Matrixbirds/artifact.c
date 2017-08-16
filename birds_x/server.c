@@ -2,7 +2,7 @@
 
 char buffer[BUFFER_SIZE];
 
-void create_socket(birds_socket_t* const* const birds) {
+void create_socket(birds_socket_t * const * restrict birds) {
   int fd = socket(AF_INET, SOCK_STREAM, 0);
   if (fd < 0) {
     fail("create socket failured");
@@ -10,7 +10,7 @@ void create_socket(birds_socket_t* const* const birds) {
   (*birds)->sock_fd = fd;
 }
 
-int bind_socket(birds_socket_t* const* const birds) {
+int bind_socket(birds_socket_t * const * restrict birds) {
   (*birds)->address->sin_family = AF_INET;
   (*birds)->address->sin_port = htons(PORT);
   (*birds)->address->sin_addr.s_addr = inet_addr("127.0.0.1");
@@ -24,7 +24,7 @@ int bind_socket(birds_socket_t* const* const birds) {
   return fd;
 }
 
-int listen_socket(birds_socket_t* const* const birds) {
+int listen_socket(birds_socket_t * const * restrict birds) {
   int fd = listen((*birds)->sock_fd, MAX_CONNECTIONS);
   if (fd < 0) {
     fail("listen socket failured");
@@ -32,7 +32,7 @@ int listen_socket(birds_socket_t* const* const birds) {
   return fd;
 }
 
-int init_socket_loop(birds_socket_t** const birds) {
+int init_socket_loop(birds_socket_t ** restrict birds) {
   while (1) {
     int accept_fd = create_accept(birds);
     recv_all(&accept_fd, &buffer, sizeof(buffer));
@@ -50,7 +50,7 @@ int init_socket_loop(birds_socket_t** const birds) {
   close((*birds)->sock_fd);
 }
 
-int create_accept(birds_socket_t* const* const birds) {
+int create_accept(birds_socket_t * const * restrict birds) {
   int fd;
   unsigned int len = sizeof((*(*birds)->address));
   if ((fd = accept((*birds)->sock_fd, (struct sockaddr*)(*birds)->address, &len)) < 0) {
@@ -59,20 +59,20 @@ int create_accept(birds_socket_t* const* const birds) {
   return fd;
 }
 
-void allocate(birds_socket_t** const birds) {
+void allocate(birds_socket_t ** restrict birds) {
   *birds = malloc(sizeof(birds_socket_t));
   (*birds)->address = malloc(sizeof(struct sockaddr_in));
   (*birds)->sock_fd = -1;
   bzero(&buffer, BUFFER_SIZE);
 }
 
-void release(birds_socket_t** birds) {
+void release(birds_socket_t ** restrict birds) {
   free((*birds)->address);
   free((*birds));
   *birds = NULL;
 }
 
-void send_all(const int* const socket, void* buffer, size_t length) {
+void send_all(const int * restrict socket, void * restrict buffer, size_t length) {
   char *ptr = (char *) buffer;
   while (length > 0)
   {
@@ -84,7 +84,7 @@ void send_all(const int* const socket, void* buffer, size_t length) {
   }
 }
 
-void recv_all(const int* const socket, void* buffer, size_t length) {
+void recv_all(const int * restrict socket, void * restrict buffer, size_t length) {
   char *ptr = (char *) buffer;
   while (length > 0)
   {

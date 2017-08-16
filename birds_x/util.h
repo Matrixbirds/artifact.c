@@ -6,6 +6,6 @@
 #define define_method(method, ...) \
   method(__VA_ARGS__); \
 
-void fail(void *msg);
+void fail(void * restrict msg);
 
 #endif
