@@ -70,7 +70,7 @@ void fill_ip_segment(tcp_ptr * const ptr, int * const fd)
   strcpy((*ptr)->ip_segment->interface, "lo0");
   memset(&(*ptr)->ifr, 0, sizeof((*ptr)->ifr));
   snprintf((*ptr)->ifr.ifr_name, sizeof((*ptr)->ifr.ifr_name), "%s", (*ptr)->ip_segment->interface);
-  if (ioctl(*fd, TIOCGSIZE, &(*ptr)->ifr) < 0)
+  if (ioctl(*fd, SIOCGIFADDR, &(*ptr)->ifr) < 0)
     rescue("ioctl");
   close(*fd);
   printf("Index for interface %s\n", (*ptr)->ip_segment->interface);
