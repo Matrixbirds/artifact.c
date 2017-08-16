@@ -1,28 +1,21 @@
 #ifndef __UTIL_H__
 #define __UTIL_H__
 
-#include <stdio.h>
 #include <stdbool.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <stdlib.h>
 #include <stdio.h>
 #include <strings.h>
-#include <errno.h>
 #include <netinet/in.h>
 #include <stdbool.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 
-
 #define ADDRESS "127.0.0.1"
 #define PORT 5399
 #define WAIT_COUNT 128
 
-void rescue(void *msg) {
-  fprintf(stderr, "[%s]: %s\n", msg, strerror(errno));
-  exit(1);
-}
+#include "defs.h"
 
 typedef struct _socket_util
 {
