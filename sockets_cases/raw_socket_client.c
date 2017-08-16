@@ -9,6 +9,7 @@
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <net/if.h>
+#include <netdb.h>
 
 #define IP4_HDRLEN 20
 #define TCP_HDRLEN 20
@@ -24,6 +25,8 @@ typedef struct _virtual_ip {
   char *interface;
   char *src_ip;
   char *dst_ip;
+  char *target;
+  struct addrinfo hints;
 } v_ip;
 
 typedef v_ip * ip_ptr;
@@ -46,7 +49,7 @@ void allocate_v_tcp(tcp_ptr * const ptr) {
   allocate_ip_segment(&(*ptr)->ip_segment);
 }
 
-char *allocate_strmem(int size)
+char *allocate_charmem(int size)
 {
   void *tmp = NULL;
   if (size <= 0) rescue("size invalid size must be >= 0");
@@ -59,14 +62,14 @@ int *allocate_intmem(int size)
 {
   void *tmp = NULL;
   if (size <= 0) rescue("size invalid size must be >= 0");
-  tmp = calloc(0, size * sizeof(char));
+  tmp = calloc(0, size * sizeof(int));
   if (NULL == tmp) rescue("calloc");
   return tmp;
 }
 
 void fill_ip_segment(tcp_ptr * const ptr, int * const fd)
 {
-  (*ptr)->ip_segment->interface = allocate_strmem(1);
+  (*ptr)->ip_segment->interface = allocate_charmem(1);
   strcpy((*ptr)->ip_segment->interface, "lo0");
   memset(&(*ptr)->ifr, 0, sizeof((*ptr)->ifr));
   snprintf((*ptr)->ifr.ifr_name, sizeof((*ptr)->ifr.ifr_name), "%s", (*ptr)->ip_segment->interface);
@@ -74,6 +77,27 @@ void fill_ip_segment(tcp_ptr * const ptr, int * const fd)
     rescue("ioctl");
   close(*fd);
   printf("Index for interface %s\n", (*ptr)->ip_segment->interface);
+  ip_ptr * const ip = &(*ptr)->ip_segment;
+  (*ip)->src_ip = allocate_charmem(1);
+  strcpy((*ip)->src_ip, "127.0.0.1");
+  (*ip)->target = allocate_charmem(1);
+  strcpy((*ip)->target, "localhost");
+  (*ip)->dst_ip = allocate_charmem(1);
+  memset(&(*ip)->hints, 0, sizeof(struct addrinfo));
+  (*ip)->hints.ai_family = AF_INET;
+  (*ip)->hints.ai_socktype = SOCK_STREAM;
+  (*ip)->hints.ai_flags = (*ip)->hints.ai_flags | AI_CANONNAME;
+  int status;
+  struct addrinfo *res;
+  if ((status = getaddrinfo((*ip)->target, NULL, &(*ip)->hints, &res)) != 0)
+    rescue("getaddrinfo");
+  struct sockaddr_in *ipv4 = (struct sockaddr_in *) res->ai_addr;
+  void *tmp = &(ipv4->sin_addr);
+  if (inet_ntop(AF_INET, tmp, (*ip)->dst_ip, INET_ADDRSTRLEN) == NULL) {
+    status = errno;
+    rescue("inet_ntop");
+  }
+  freeaddrinfo(res);
 }
 
 int main(int argc, char *argv[])
